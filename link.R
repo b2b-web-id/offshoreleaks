@@ -1,5 +1,15 @@
-edges <- read.csv("data/edges.csv", header=T, sep=";")
-nodes <- read.csv("data/nodes.csv", header=T, sep=";")
+library(RMySQL)
+con <- dbConnect(MySQL(), dbname='offshoreleaks',
+                 username='offshoreleaks', host='localhost')
+dbListTables(con)
+edges <- dbReadTable(con, "edges")
+entities <- dbReadTable(con, "entities")
+entities_id <- dbFetch(dbSendQuery(con, "SELECT * FROM entities
+                                         WHERE country_codes LIKE '%IDN%'"), n=-1)
+officers <- dbReadTable(con, "officers")
+officers_id <- dbFetch(dbSendQuery(con, "SELECT * FROM officers
+                                         WHERE country_codes LIKE '%IDN%'"), n=-1)
+
 edges_fix <- edges[, c('Entity_ID1', 'Entity_ID2', 'Entity_ID1', 'description_')]
 edges_fix <- merge(edges_fix, nodes[,c('Unique_ID','Description_')], by.x=c('Entity_ID1'), by.y=c('Unique_ID'))
 edges_fix <- merge(edges_fix, nodes[,c('Unique_ID','Description_')], by.x=c('Entity_ID2'), by.y=c('Unique_ID'))
